@@ -5,6 +5,7 @@ using ExpenseTrackerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -23,16 +24,25 @@ namespace ExpenseTrackerAPI.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllGastos()
+        public async Task<IActionResult> GetAllGastos(
+            [FromQuery] string filtrarHasta = null,
+            [FromQuery] DateTime? fechaInicio = null,
+            [FromQuery] DateTime? fechaFin = null)
         {
-            var gastos = await _gastoService.GetAllGastos();
+            // Obtener el usuario Id del token
+            var usuarioID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var gastos = await _gastoService.GetAllGastos(usuarioID, filtrarHasta, fechaInicio, fechaFin);
             return Ok(gastos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGasto(int id)
         {
-            var gasto = await _gastoService.GetGasto(id);
+            // Obtener el usuario Id del token
+            var usuarioID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var gasto = await _gastoService.GetGasto(usuarioID, id);
             if (gasto == null)
             {
                 return NotFound();
@@ -49,14 +59,8 @@ namespace ExpenseTrackerAPI.Controllers.Api
                 return BadRequest(ModelState);
             }
 
-            // Obtener el usuario Id del token y validar que no sea nulo
-            var valorUsuarioID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(valorUsuarioID))
-            {
-                return Unauthorized("El usuario Id no se encuentra en el token");
-            }
-
-            var usuarioID = int.Parse(valorUsuarioID);
+            // Obtener el usuario Id del token
+            var usuarioID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var result = await _gastoService.AddGasto(gastoCreacionDTO, usuarioID);
 
@@ -76,7 +80,10 @@ namespace ExpenseTrackerAPI.Controllers.Api
                 return BadRequest(ModelState);
             }
 
-            var result = await _gastoService.UpdateGasto(id, gastoModificacionDTO);
+            // Obtener el usuario Id del token
+            var usuarioID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _gastoService.UpdateGasto(usuarioID, id, gastoModificacionDTO);
             if (!result.Success)
             {
                 return NotFound(result.ErrorMessage);
@@ -88,7 +95,10 @@ namespace ExpenseTrackerAPI.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGasto(int id)
         {
-            var result = await _gastoService.DeleteGasto(id);
+            // Obtener el usuario Id del token
+            var usuarioID = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _gastoService.DeleteGasto(usuarioID, id);
 
             if (!result.Success)
             {
