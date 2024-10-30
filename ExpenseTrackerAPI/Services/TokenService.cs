@@ -47,7 +47,6 @@ namespace ExpenseTrackerAPI.Services
             {
                 throw ex;
             }
-
         }
     }
 }

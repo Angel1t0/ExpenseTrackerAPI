@@ -1,13 +1,14 @@
 ﻿using ExpenseTrackerAPI.Data;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ExpenseTrackerAPI.Data.Repositories
 {
     public interface IGastoRepository
     {
-        Task<IEnumerable<Gasto>> GetAllGastos();
-        Task<Gasto> GetGasto(int id);
+        Task<IQueryable<Gasto>> GetAllGastos(int usuarioID);
+        Task<Gasto> GetGasto(int usuarioID, int id);
         Task AddGasto(Gasto gasto);
         Task UpdateGasto(Gasto gasto);
         Task DeleteGasto(Gasto gasto);
@@ -15,22 +16,26 @@ namespace ExpenseTrackerAPI.Data.Repositories
     public class GastoRepository : IGastoRepository
     {
         private readonly ApplicationDbContext _context;
-
         public GastoRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Gasto>> GetAllGastos()
+        public async Task<IQueryable<Gasto>> GetAllGastos(int usuarioID)
         {
-            return await _context.Gastos.Include(g => g.Categoria).ToListAsync();
+            var gastos = _context.Gastos
+                .Where(g => g.UsuarioId == usuarioID)
+                .Include(g => g.Categoria).AsQueryable();
+
+            return gastos;
         }
 
-        public async Task<Gasto> GetGasto(int id)
+        public async Task<Gasto> GetGasto(int usuarioID, int id)
         {
             var gasto = await _context.Gastos
-            .Include(g => g.Categoria)
-            .FirstOrDefaultAsync(g => g.Id == id);
+                .Where(g => g.UsuarioId == usuarioID)
+                .Include(g => g.Categoria)
+                .FirstOrDefaultAsync(g => g.Id == id);
 
             return gasto;
         }

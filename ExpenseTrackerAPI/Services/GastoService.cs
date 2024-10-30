@@ -3,16 +3,17 @@ using ExpenseTrackerAPI.Dtos;
 using ExpenseTrackerAPI.Dtos.Categoria;
 using ExpenseTrackerAPI.Dtos.Gasto;
 using ExpenseTrackerAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTrackerAPI.Services
 {
     public interface IGastoService
     {
-        Task<IEnumerable<GastoDTO>> GetAllGastos();
-        Task<GastoDTO> GetGasto(int id);
+        Task<IEnumerable<GastoDTO>> GetAllGastos(int usuarioID, string filtrarHasta, DateTime? fechaInicio, DateTime? fechaFin);
+        Task<GastoDTO> GetGasto(int usuarioID, int id);
         Task<ServiceResult<GastoDTO>> AddGasto(GastoOperacionDTO gastoCreacion, int usuarioID);
-        Task<ServiceResult<GastoDTO>> UpdateGasto(int Id, GastoOperacionDTO gastoModificacion);
-        Task<ServiceResult<GastoDTO>> DeleteGasto(int id);
+        Task<ServiceResult<GastoDTO>> UpdateGasto(int usuarioID, int Id, GastoOperacionDTO gastoModificacion);
+        Task<ServiceResult<GastoDTO>> DeleteGasto(int usuarioID, int id);
     }
 
     public class GastoService : IGastoService
@@ -28,9 +29,36 @@ namespace ExpenseTrackerAPI.Services
             _usuarioRepository = usuarioRepository;
         }
 
-        public async Task<IEnumerable<GastoDTO>> GetAllGastos()
+        public async Task<IEnumerable<GastoDTO>> GetAllGastos(int usuarioId, string filtrarHasta, DateTime? fechaInicio, DateTime? fechaFin)
         {
-            var gastos = await _gastoRepository.GetAllGastos();
+            var query = await _gastoRepository.GetAllGastos(usuarioId);
+
+            DateTime fechaHoy = DateTime.Now;
+
+            if (!string.IsNullOrEmpty(filtrarHasta))
+            {
+                switch (filtrarHasta)
+                {
+                    case "semanapasada":
+                        query = query.Where(g => g.FechaGasto >= fechaHoy.AddDays(-7));
+                        break;
+                    case "mespasado":
+                        query = query.Where(g => g.FechaGasto >= fechaHoy.AddMonths(-1));
+                        break;
+                    case "hace3meses":
+                        query = query.Where(g => g.FechaGasto >= fechaHoy.AddMonths(-3));
+                        break;
+                    default:
+                        // Por defecto filtrar todos los gastos
+                        break;
+                }
+            }
+            else if (fechaInicio.HasValue && fechaFin.HasValue)
+            { 
+                query = query.Where(g => g.FechaGasto >= fechaInicio && g.FechaGasto <= fechaFin);
+            }
+
+            var gastos = await query.ToListAsync();
             
             return gastos.Select(g => new GastoDTO
             {
@@ -47,9 +75,14 @@ namespace ExpenseTrackerAPI.Services
             });
         }
 
-        public async Task<GastoDTO> GetGasto(int id)
+        public async Task<GastoDTO> GetGasto(int usuarioID, int id)
         {
-            var gasto = await _gastoRepository.GetGasto(id);
+            var gasto = await _gastoRepository.GetGasto(usuarioID, id);
+
+            if (gasto == null)
+            {
+                return null;
+            }
 
             return new GastoDTO
             {
@@ -68,6 +101,8 @@ namespace ExpenseTrackerAPI.Services
 
         public async Task<ServiceResult<GastoDTO>> AddGasto(GastoOperacionDTO gastoCreacionDTO, int usuarioID)
         {
+            // Va
+
             // Validar que la categoria exista
             var categoria = _categoriaRepository.GetCategoria(gastoCreacionDTO.CategoriaId);
             if (categoria == null)
@@ -110,10 +145,10 @@ namespace ExpenseTrackerAPI.Services
             return ServiceResult<GastoDTO>.SuccessResult(gastoDTO);
         }
 
-        public async Task<ServiceResult<GastoDTO>> UpdateGasto(int Id, GastoOperacionDTO gastoModificacionDTO)
+        public async Task<ServiceResult<GastoDTO>> UpdateGasto(int usuarioID, int Id, GastoOperacionDTO gastoModificacionDTO)
         {
             // Validar que el gasto exista
-            var gasto = await _gastoRepository.GetGasto(Id);
+            var gasto = await _gastoRepository.GetGasto(usuarioID, Id);
             if(gasto == null)
             {
                 return ServiceResult<GastoDTO>.ErrorResult("El gasto no existe");
@@ -150,9 +185,9 @@ namespace ExpenseTrackerAPI.Services
             return ServiceResult<GastoDTO>.SuccessResult(gastoDTO);
         }
 
-        public async Task<ServiceResult<GastoDTO>> DeleteGasto(int id)
+        public async Task<ServiceResult<GastoDTO>> DeleteGasto(int usuarioID, int id)
         {
-            var gasto = await _gastoRepository.GetGasto(id);
+            var gasto = await _gastoRepository.GetGasto(usuarioID, id);
             if (gasto == null)
             {
                 return ServiceResult<GastoDTO>.ErrorResult("El gasto no existe");
