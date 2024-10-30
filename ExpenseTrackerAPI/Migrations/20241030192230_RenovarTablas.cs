@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,7 +8,7 @@
 namespace ExpenseTrackerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class MigracionInicial : Migration
+    public partial class RenovarTablas : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,7 +36,7 @@ namespace ExpenseTrackerAPI.Migrations
                     Apellido = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaCreacion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,9 +52,9 @@ namespace ExpenseTrackerAPI.Migrations
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CategoriaId = table.Column<int>(type: "int", nullable: false),
-                    FechaGasto = table.Column<int>(type: "int", nullable: false),
+                    FechaGasto = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Monto = table.Column<float>(type: "real", nullable: false),
-                    FechaCreacion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
