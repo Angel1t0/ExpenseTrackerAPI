@@ -14,11 +14,11 @@ namespace ExpenseTrackerAPI.Models
         [Required]
         public int CategoriaId { get; set; }
         [Required]
-        public int FechaGasto { get; set; }
+        public DateTime FechaGasto { get; set; }
         [Required]
         [Range(0, 9999999)]
         public float Monto { get; set; }
-        public string FechaCreacion { get; set; } = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
         [ForeignKey("UsuarioId")]
         public virtual Usuario Usuario { get; set; }

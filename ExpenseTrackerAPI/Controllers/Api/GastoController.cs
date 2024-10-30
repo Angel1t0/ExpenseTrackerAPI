@@ -42,16 +42,23 @@ namespace ExpenseTrackerAPI.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddGasto([FromBody] GastoCreacionDTO gastoDTO)
+        public async Task<IActionResult> AddGasto([FromBody] GastoOperacionDTO gastoCreacionDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var usuarioID = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub));
+            // Obtener el usuario Id del token y validar que no sea nulo
+            var valorUsuarioID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(valorUsuarioID))
+            {
+                return Unauthorized("El usuario Id no se encuentra en el token");
+            }
 
-            var result = await _gastoService.AddGasto(gastoDTO, usuarioID);
+            var usuarioID = int.Parse(valorUsuarioID);
+
+            var result = await _gastoService.AddGasto(gastoCreacionDTO, usuarioID);
 
             if (!result.Success)
             {
@@ -62,14 +69,14 @@ namespace ExpenseTrackerAPI.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateGasto(int id, [FromBody] GastoBorrarDTO gastoDTO)
+        public async Task<IActionResult> UpdateGasto(int id, [FromBody] GastoOperacionDTO gastoModificacionDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _gastoService.UpdateGasto(id, gastoDTO);
+            var result = await _gastoService.UpdateGasto(id, gastoModificacionDTO);
             if (!result.Success)
             {
                 return NotFound(result.ErrorMessage);

@@ -8,6 +8,6 @@ namespace ExpenseTrackerAPI.Dtos.Usuario
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Email { get; set; }
-        public string FechaCreacion { get; set; }
+        public DateTime FechaCreacion { get; set; }
     }
 }
