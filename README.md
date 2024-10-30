@@ -13,7 +13,7 @@ Este proyecto está diseñado como parte de mi portafolio de habilidades en desa
 
 ## Tecnologías Utilizadas
 
-- **ASP.NET Core**: Framework principal para el desarrollo de la API.
+- **ASP.NET Core 8.0**: Framework principal para el desarrollo de la API.
 - **Entity Framework Core**: ORM para la gestión de la base de datos.
 - **JWT (JSON Web Token)**: Autenticación y autorización basada en tokens.
 - **Swagger**: Documentación interactiva de la API.
@@ -27,7 +27,7 @@ Este proyecto está diseñado como parte de mi portafolio de habilidades en desa
 
 2. **Gestión de Gastos (CRUD)**
    - Crear, leer, actualizar y eliminar gastos.
-   - Filtrado de gastos por categorías y fecha.
+   - Filtrado de gastos por fechas.
 
 ## Endpoints Principales
 
@@ -36,11 +36,17 @@ Este proyecto está diseñado como parte de mi portafolio de habilidades en desa
 - `POST /api/Cuenta/login`: Inicio de sesión y generación de token JWT.
 
 ### Gestión de Gastos
-- `GET /api/Gasto`: Obtener todos los gastos del usuario autenticado.
+- `GET /api/Gasto`: Obtener todos los gastos del usuario autenticado y opcionalmente filtrar por fechas.
 - `GET /api/Gasto/{id}`: Obtener un gasto específico por ID.
 - `POST /api/Gasto`: Crear un nuevo gasto.
 - `PUT /api/Gasto/{id}`: Actualizar un gasto existente.
 - `DELETE /api/Gasto/{id}`: Eliminar un gasto.
+
+### Categorías
+- `GET /api/Categoria`: Obtener todas las categorías disponibles para agregar un gasto.
+
+### Endpoints
+![image](https://github.com/user-attachments/assets/2590a235-1393-40c8-a3ff-1727ba4b0a42)
 
 #### Referencia del Proyecto
 RoadMap: https://roadmap.sh/projects/expense-tracker-api
