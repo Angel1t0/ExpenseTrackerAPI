@@ -6,6 +6,7 @@ namespace ExpenseTrackerAPI.Data.Repositories
 {
     public interface ICategoriaRepository
     {
+        Task<IEnumerable<Categoria>> GetCategorias();
         Task<Categoria> GetCategoria(int id);
     }
     public class CategoriaRepository : ICategoriaRepository
@@ -15,6 +16,11 @@ namespace ExpenseTrackerAPI.Data.Repositories
         public CategoriaRepository(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<IEnumerable<Categoria>> GetCategorias()
+        {
+            return await _context.Categorias.ToListAsync();
         }
 
         public async Task<Categoria> GetCategoria(int id)
