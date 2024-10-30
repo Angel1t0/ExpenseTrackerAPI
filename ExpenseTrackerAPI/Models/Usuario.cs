@@ -4,6 +4,7 @@ namespace ExpenseTrackerAPI.Models
 {
     public class Usuario
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public string Nombre { get; set; }
@@ -17,7 +18,7 @@ namespace ExpenseTrackerAPI.Models
         [Required]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$")]
         public string Password { get; set; }
-        public string FechaCreacion { get; set; } = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
         public virtual ICollection<Gasto> Gastos { get; set; }
     }

@@ -10,9 +10,9 @@ namespace ExpenseTrackerAPI.Services
     {
         Task<IEnumerable<GastoDTO>> GetAllGastos();
         Task<GastoDTO> GetGasto(int id);
-        Task<ServiceResult<GastoDTO>> AddGasto(GastoCreacionDTO gasto, int usuarioID);
-        Task<ServiceResult<Gasto>> UpdateGasto(int Id, GastoBorrarDTO gastoDTO);
-        Task<ServiceResult<Gasto>> DeleteGasto(int id);
+        Task<ServiceResult<GastoDTO>> AddGasto(GastoOperacionDTO gastoCreacion, int usuarioID);
+        Task<ServiceResult<GastoDTO>> UpdateGasto(int Id, GastoOperacionDTO gastoModificacion);
+        Task<ServiceResult<GastoDTO>> DeleteGasto(int id);
     }
 
     public class GastoService : IGastoService
@@ -66,7 +66,7 @@ namespace ExpenseTrackerAPI.Services
             };
         }
 
-        public async Task<ServiceResult<GastoDTO>> AddGasto(GastoCreacionDTO gastoCreacionDTO, int usuarioID)
+        public async Task<ServiceResult<GastoDTO>> AddGasto(GastoOperacionDTO gastoCreacionDTO, int usuarioID)
         {
             // Validar que la categoria exista
             var categoria = _categoriaRepository.GetCategoria(gastoCreacionDTO.CategoriaId);
@@ -91,7 +91,6 @@ namespace ExpenseTrackerAPI.Services
                 Monto = gastoCreacionDTO.Monto
             };
 
-
             await _gastoRepository.AddGasto(gasto);
 
             var gastoDTO = new GastoDTO
@@ -111,41 +110,71 @@ namespace ExpenseTrackerAPI.Services
             return ServiceResult<GastoDTO>.SuccessResult(gastoDTO);
         }
 
-        public async Task<ServiceResult<Gasto>> UpdateGasto(int Id, GastoBorrarDTO gastoDTO)
+        public async Task<ServiceResult<GastoDTO>> UpdateGasto(int Id, GastoOperacionDTO gastoModificacionDTO)
         {
             // Validar que el gasto exista
             var gasto = await _gastoRepository.GetGasto(Id);
             if(gasto == null)
             {
-                return ServiceResult<Gasto>.ErrorResult("El gasto no existe");
+                return ServiceResult<GastoDTO>.ErrorResult("El gasto no existe");
             }
 
             // Validar que la categoria exista
-            var categoria = _categoriaRepository.GetCategoria(gastoDTO.CategoriaId);
+            var categoria = _categoriaRepository.GetCategoria(gastoModificacionDTO.CategoriaId);
             if (categoria == null)
             {
-                return ServiceResult<Gasto>.ErrorResult("La categoria no existe");
+                return ServiceResult<GastoDTO>.ErrorResult("La categoria no existe");
             }
 
-            gasto.CategoriaId = gastoDTO.CategoriaId;
-            gasto.Descripcion = gastoDTO.Descripcion;
-            gasto.FechaGasto = gastoDTO.FechaGasto;
-            gasto.Monto = gastoDTO.Monto;
+            gasto.CategoriaId = gastoModificacionDTO.CategoriaId;
+            gasto.Descripcion = gastoModificacionDTO.Descripcion;
+            gasto.FechaGasto = gastoModificacionDTO.FechaGasto;
+            gasto.Monto = gastoModificacionDTO.Monto;
 
             await _gastoRepository.UpdateGasto(gasto);
-            return ServiceResult<Gasto>.SuccessResult(gasto);
+
+            var gastoDTO = new GastoDTO
+            {
+                Id = gasto.Id,
+                Descripcion = gasto.Descripcion,
+                FechaGasto = gasto.FechaGasto,
+                Monto = gasto.Monto,
+                FechaCreacion = gasto.FechaCreacion,
+                Categoria = new CategoriaDTO
+                {
+                    Id = gasto.Categoria.Id,
+                    Nombre = gasto.Categoria.Nombre
+                }
+            };
+
+            return ServiceResult<GastoDTO>.SuccessResult(gastoDTO);
         }
 
-        public async Task<ServiceResult<Gasto>> DeleteGasto(int id)
+        public async Task<ServiceResult<GastoDTO>> DeleteGasto(int id)
         {
             var gasto = await _gastoRepository.GetGasto(id);
             if (gasto == null)
             {
-                return ServiceResult<Gasto>.ErrorResult("El gasto no existe");
+                return ServiceResult<GastoDTO>.ErrorResult("El gasto no existe");
             }
 
             await _gastoRepository.DeleteGasto(gasto);
-            return ServiceResult<Gasto>.SuccessResult(gasto);
+
+            var gastoDTO = new GastoDTO
+            {
+                Id = gasto.Id,
+                Descripcion = gasto.Descripcion,
+                FechaGasto = gasto.FechaGasto,
+                Monto = gasto.Monto,
+                FechaCreacion = gasto.FechaCreacion,
+                Categoria = new CategoriaDTO
+                {
+                    Id = gasto.Categoria.Id,
+                    Nombre = gasto.Categoria.Nombre
+                }
+            };
+
+            return ServiceResult<GastoDTO>.SuccessResult(gastoDTO);
         }
     }
 }
